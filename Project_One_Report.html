@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Project_One_Report</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Project_One_Report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Project_One_Report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Project_One_Report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Project_One_Report_files/libs/quarto-html/popper.min.js"></script>
+<script src="Project_One_Report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Project_One_Report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Project_One_Report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Project_One_Report_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Project_One_Report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Project_One_Report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Project_One_Report_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Project_One_Report</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="executive-summary" class="level2">
+<h2 class="anchored" data-anchor-id="executive-summary">Executive Summary</h2>
+<p>Measuring receiver success in football is a nuanced challenge, especially in today’s game, where wide receivers, tight ends, and running backs all play key roles in the passing game. Completion percentage over expected is typically used to evaluate quarterback performance, but we applied this concept to pass catchers. To evaluate pass catcher value, we focused on how often a pass is completed when a player is targeted, compared to how likely that pass was to be completed.&nbsp;</p>
+<p>Our model was inspired by estimating expected goals for soccer, which uses shot data to calculate expected goals and, further, goals above expected. Using play-by-play data from the NFLfastR data set, we estimated the probability of a pass being caught based on factors like down, distance, and air yards. We used data from the 2021-2023 seasons to predict receiving outcomes for the 2024 season. Plays missing key variables were excluded, as we couldn’t reliably fill in the gaps. We also limited our analysis to pass catchers with at least 50 targets per season to avoid skewed results. This benchmark was determined by our sources we found from <a href="https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats">Sports Illustrated</a> and <a href="https://nextgenstats.nfl.com/stats/receiving#yards">Next Generation Stats</a>, which suggest 65 and 42 as target benchmarks.&nbsp;</p>
+<p>Overall, our model had somewhat strong predictive power, explaining 60% of the variance in the data during the 2024 season. We also found several interesting insights. Cooper Kupp’s season was backed by high completion rate evidence; he consistently caught more passes than expected. Running backs have also become highly effective targets. For example, Devon Achane’s 2024 season was impressive, ranking among league leaders for reception percentage over expected. These results make sense because Achane is often targeted close to the line of scrimmage or even behind it, so his quarterback does not have to make significantly difficult throws, and Achane does have to catch the ball at full speed while closely guarded by defenders. One of the most interesting insights was identifying reliable yet low recognition targets. A player like Cole Kmet in 2024 had a strong catch rate above expected despite limited volume, suggesting that teams might uncover hidden value by analyzing receiver efficiency.&nbsp;</p>
+<p>While our model offers meaningful insights, it has limitations. More advanced tracking data, such as receiver separation or proximity to the sideline, could improve our predictions and better capture pass catcher performance. These insights suggest that with smarter data and more intense models, teams can uncover more overlooked talent and rethink efficiency.</p>
+</section>
+<section id="technical-report" class="level2">
+<h2 class="anchored" data-anchor-id="technical-report">Technical Report</h2>
+<section id="overview" class="level3">
+<h3 class="anchored" data-anchor-id="overview">Overview</h3>
+<p>This project introduces a Completion Percentage Over Expected (CPOE) model tailored for pass catchers. Using the play-by-play data made available through the nflfastR package, we created a model that predicts at what rate a receiver catches a target over what is expected. While CPOE traditionally measures Completion Percentage Over Expected of a quarterback, we wanted to determine how this could be applied to pass catchers. This model was influenced by Lectures 2 and 3 in our sports analytics class tought by professor Sameer Deshpande, dealing with expected goals in soccer. This report will break down how we constructed our model and show application of the model regarding the 2021-2024 NFL seasons.</p>
+</section>
+<section id="data-gathering" class="level3">
+<h3 class="anchored" data-anchor-id="data-gathering">Data Gathering</h3>
+<p>Before beginning model training, we first ensured that our data set was usable and relevant. The first step was to narrow down the range of data. We selected the 2021 through 2024 NFL seasons for training and testing purposes (we will explain this in detail later). This time frame was chosen because it reflects the relatively modern game play trends, increasing the likelihood that our model will generalize well to future seasons. We excluded the 2020 season, which was an outlier due to COVID. To source our data, we used the nflfastR package, which provides a wide range of play-by-play variables that are suitable for modeling and this data is supported with great documentation and resources.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nflfastR)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2024</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pbp_train <span class="ot">=</span> <span class="fu">load_pbp</span>(<span class="dv">2021</span><span class="sc">:</span><span class="dv">2023</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pbp_2024 <span class="ot">=</span> <span class="fu">load_pbp</span>(<span class="dv">2024</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data-preparation" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation">Data Preparation</h3>
+<p>To begin we filtered out all plays that were not passing plays during the regular season. We chose to focus exclusively on regular season data to avoid introducing variability from preseason or postseason contexts, which could act as a confounding predictor. Next, we removed plays that resulted in a sack, spike, kneel, throwaway, or aborted pass, these events prevent a pass catcher from having a legitimate opportunity to complete the target and would distort the model. We also excluded two-point conversion attempts to maintain consistency with standard offensive phases and avoid skewing the model with rare and atypical plays. After isolating the valid passing plays, we selected a subset of variables relevant to our modeling goals (discussed in the next section) and cleaned the data set accordingly. Specifically we dropped any rows with missing values in the following fields: completed_pass, air_yards, pass_location, down, ydstogo, yardline_100, and reciever_player_id. This ensured that each target in our data set had complete information for all predictors required to estimate completion probability.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>train_pass <span class="ot">&lt;-</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  pbp_train <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type<span class="sc">==</span><span class="st">"pass"</span>, season_type<span class="sc">==</span><span class="st">"REG"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc),  </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sack"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"spike"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"kneel"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"throwaway"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"aborted"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    game_id, play_id, complete_pass, air_yards, shotgun, no_huddle, qb_hit, posteam_type, pass_location, </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    yardline_100, down, ydstogo, posteam, defteam, passer_player_id, desc, receiver_player_id, receiver_player_name, season</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(complete_pass),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(air_yards),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(pass_location),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(down),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(ydstogo),</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(yardline_100),</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(receiver_player_id)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">shotgun =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(shotgun), <span class="dv">0</span>L, shotgun),</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">no_huddle =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(no_huddle), <span class="dv">0</span>L, no_huddle),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">qb_hit =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(qb_hit), <span class="dv">0</span>L, qb_hit),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">posteam_type =</span> <span class="fu">factor</span>(posteam_type),</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">pass_location =</span> <span class="fu">factor</span>(pass_location),</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">down =</span> <span class="fu">factor</span>(down),</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>test_pass <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  pbp_2024 <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type <span class="sc">==</span> <span class="st">"pass"</span>, season_type<span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc),  </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sack"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"spike"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"kneel"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"throwaway"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"aborted"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    game_id, play_id ,complete_pass, air_yards, shotgun, no_huddle, qb_hit, posteam_type, pass_location, </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    yardline_100, down, ydstogo, posteam, defteam, passer_player_id, desc, receiver_player_id, receiver_player_name, season</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(complete_pass),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(air_yards),</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(pass_location),</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(down),</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(ydstogo),</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(yardline_100),</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(receiver_player_id)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">shotgun =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(shotgun), <span class="dv">0</span>L, shotgun),</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">no_huddle =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(no_huddle), <span class="dv">0</span>L, no_huddle),</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">qb_hit =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(qb_hit), <span class="dv">0</span>L, qb_hit),</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">posteam_type =</span> <span class="fu">factor</span>(posteam_type, <span class="at">levels =</span> <span class="fu">levels</span>(train_pass<span class="sc">$</span>posteam_type)),</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">pass_location =</span> <span class="fu">factor</span>(pass_location, <span class="at">levels =</span> <span class="fu">levels</span>(train_pass<span class="sc">$</span>pass_location)),</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">down =</span> <span class="fu">factor</span>(down, <span class="at">levels =</span> <span class="fu">levels</span>(train_pass<span class="sc">$</span>down)),</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="feature-selection" class="level3">
+<h3 class="anchored" data-anchor-id="feature-selection">Feature Selection</h3>
+<p>Most modern CPOE models rely on a combination of play-by-play data and advanced player tracking data. For this project, we chose to work exclusively with play-by-play data due to the difficulty of acquiring and processing tracking data. While this choice limits the amount of variables that we can work with, we selected variables as best as we could to capture situation context.</p>
+<p>The variables used in our model include:</p>
+<ul>
+<li><p>Air yards: Measures the depth of the throw, a key indicator for difficulty.</p></li>
+<li><p>Formation: Whether the play began in shotgun or under-center.</p></li>
+<li><p>No-huddle: Indicates the tempo and urgency of the play.</p></li>
+<li><p>QB hits: Explains pressure or interference.</p></li>
+<li><p>Pass location: Left, right, or center.</p></li>
+<li><p>Yardline: The starting field position, which influences play calling.</p></li>
+<li><p>Down and Distance: Captures game situation and urgency.</p></li>
+</ul>
+<p>These variables describe the context, action, and condition of the play. To validate our feature choices we ran a logistical regression model. This assesses the statistical significance of the variables. All selected variables show meaningful contribution to predicting the completion probability.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>comp_glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  complete_pass <span class="sc">~</span> air_yards <span class="sc">+</span> shotgun <span class="sc">+</span> no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location<span class="sc">+</span> yardline_100 <span class="sc">+</span> down <span class="sc">+</span> ydstogo,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data=</span> train_pass,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family=</span><span class="fu">binomial</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                               Variable Estimate Std_Error z_value Significant
+(Intercept)                 (Intercept)    1.043     0.043   24.11         Yes
+air_yards                     air_yards   -0.063     0.001  -61.89         Yes
+shotgun                         shotgun   -0.195     0.029   -6.70         Yes
+no_huddle                     no_huddle    0.089     0.031    2.88         Yes
+qb_hit                           qb_hit   -0.845     0.033  -25.31         Yes
+pass_locationmiddle pass_locationmiddle    0.117     0.027    4.40         Yes
+pass_locationright   pass_locationright   -0.029     0.022   -1.32          No
+yardline_100               yardline_100    0.007     0.000   17.08         Yes
+down2                             down2   -0.032     0.024   -1.33          No
+down3                             down3   -0.165     0.027   -6.07         Yes
+down4                             down4   -0.329     0.063   -5.23         Yes
+ydstogo                         ydstogo    0.014     0.003    5.19         Yes</code></pre>
+</div>
+</div>
+<p>After determining our variables were significant we’re ready to train our model.</p>
+</section>
+<section id="model-training" class="level3">
+<h3 class="anchored" data-anchor-id="model-training">Model Training</h3>
+<p>We used the <a href="https://imbs-hl.github.io/ranger/index.html">ranger</a> package to implement a random forest classifier for predicting completion probability. While we do not detail every modeling parameter in this report, our choices were guided by two considerations.</p>
+<p>1) Function Approximation: Random forests are considered universal approximaters, meaning they can model highly nonlinear relationships. This means that for every function that exists there is a regression tree that can approximate it. This is essential for capturing complex football plays.</p>
+<p>2) Interaction Modeling: Football is very interactive. For example, a 10- yard pass to the left side of the field differs dramatically from a 50-yard pass to the same area. Random forests can capture this complex interaction data and Interactions are also important for modeling CPOE.</p>
+<p>To avoid sampling bias, we split the data by season: training on 2021-2023 and testing on 2024. This ensures that our model is evaluated on unseen data and simulates real-world conditions. This was also important to ensure no in-sampling testing occurred.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">=</span> train_pass<span class="sc">$</span>complete_pass</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">=</span> test_pass<span class="sc">$</span>complete_pass</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">=</span> train_pass <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(complete_pass, air_yards, shotgun, no_huddle, qb_hit, pass_location, yardline_100, down, ydstogo)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">=</span> test_pass <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(complete_pass, air_yards, shotgun, no_huddle, qb_hit, pass_location, yardline_100, down, ydstogo)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> train_data <span class="sc">%&gt;%</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">complete_pass =</span> <span class="fu">factor</span>(complete_pass, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)))</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> test_data <span class="sc">%&gt;%</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">complete_pass =</span> <span class="fu">factor</span>(complete_pass, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ranger)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ranger' was built under R version 4.4.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">ranger</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> complete_pass<span class="sc">~</span> .,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_data, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Predict on our training and test data</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>train_pass<span class="sc">$</span>train_preds <span class="ot">=</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> train_pass)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>test_pass<span class="sc">$</span>test_preds <span class="ot">=</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> test_pass)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>train_data<span class="sc">$</span>train_preds <span class="ot">=</span> <span class="fu">predict</span>(fit, <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>test_preds  <span class="ot">=</span> <span class="fu">predict</span>(fit, <span class="at">data =</span> test_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In order to evaluate our model we’ll use log-loss.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>logloss <span class="ot">=</span> <span class="cf">function</span>(y, phat){ </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  phat <span class="ot">=</span> <span class="fu">pmin</span>(<span class="fu">pmax</span>(phat, <span class="fl">1e-12</span>), <span class="dv">1</span> <span class="sc">-</span> <span class="fl">1e-12</span>) </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="sc">-</span><span class="fu">mean</span>(y <span class="sc">*</span> <span class="fu">log</span>(phat) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> phat)))}</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">=</span> <span class="fu">logloss</span>(y_train, train_pass<span class="sc">$</span>train_preds)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>test_logloss  <span class="ot">=</span> <span class="fu">logloss</span>(y_test,  test_pass<span class="sc">$</span>test_preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>  Model LogLoss
+1 Train 0.51633
+2  Test 0.55564</code></pre>
+</div>
+</div>
+</section>
+<section id="results" class="level3">
+<h3 class="anchored" data-anchor-id="results">Results</h3>
+<p>With the model trained and validated, we applied it to all targets from 2021-2024 regular season data. For each target, the model outputs a predicted probability of completion. We then aggregated these predictions by pass catcher to compare expected completion rates against actual performance.</p>
+<p>To ensure reliability of our estimates, we limited our analysis to pass catchers with at least 50 targets. This threshold was chosen by looking at industry sources including <a href="https://www.fantasypoints.com/nfl/articles/2023/fantasy-points-data-most-important-wr-stats#/">fantasypoints.com</a>, <a href="https://www.4for4.com/2024/preseason/most-predictable-wide-receiver-stats">4for4.com</a>, <a href="https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats">Sports Illustrated</a>, and <a href="https://nextgenstats.nfl.com/stats/receiving#yards">Next Gen Stats</a> to determine a range of targets that would be acceptable.</p>
+<p>The relationship between predicted and actual success rates was moderately strong, with an r^2 value of .60 in the 2024 season. This suggests that our model captures a good proportion of the variance in catch passer performance.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>summary_24 <span class="ot">=</span> test_pass <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(receiver_player_name, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_predicted_suc =</span> <span class="fu">mean</span>(test_preds),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_success =</span> <span class="fu">mean</span>(<span class="fu">as.numeric</span>(<span class="fu">as.character</span>(complete_pass))),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_targets =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(actual_success)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_targets <span class="sc">&gt;</span> <span class="dv">50</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">wrcpoe =</span> actual_success <span class="sc">-</span> avg_predicted_suc) <span class="sc">%&gt;%</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Name =</span> receiver_player_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'receiver_player_name'. You can override
+using the `.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>summary21_23 <span class="ot">=</span> train_pass <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(receiver_player_name, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_predicted_suc =</span> <span class="fu">mean</span>(train_preds),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_success =</span> <span class="fu">mean</span>(<span class="fu">as.numeric</span>(<span class="fu">as.character</span>(complete_pass))),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_targets =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(actual_success)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_targets <span class="sc">&gt;</span> <span class="dv">50</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">wrcpoe =</span> actual_success <span class="sc">-</span> avg_predicted_suc) <span class="sc">%&gt;%</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Name =</span> receiver_player_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'receiver_player_name'. You can override
+using the `.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">=</span> <span class="fu">rbind</span>(summary21_23, summary_24)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Finalgraphactual_vs_predicted.png" class="img-fluid figure-img"></p>
+<figcaption>2021 r^2 = 0.612367, 2022 r^2 = 0.684678, 2023 r^2 = 0.666335, 2024 r^2 = 0.600968</figcaption>
+</figure>
+</div>
+<p>We also chose to divide the relationship between predicted and actual success into four quadrants to better interpret receiver performance. The upper right quadrant represents players who receive relatively easy opportunities and consistently convert them. These are often running backs or short-yardage specialist players, for example De’von Achane, Bucky Irving, and Rachaad White. In contrast, the bottom left quadrant includes players who are targeted in difficult situations and fail to convert them. This group consists of deep-threat receivers like Adonai Mitchell, who face low probability throws resulting in lower completion rates. The bottom right quadrant captures players who receive easier opportunities but fail to convert the. This suggests inefficiency in performance, execution, timing, and other factors. Finally, the top left quadrant is unique, it highlights players who are supposed to make difficult catches and still succeed. This includes Tight ends like Cole Kmet, Mark Andrews, and George Kittle. They consistently outperform expectations. This quadrant framework lets us contextualize receiver efficiency beyond the raw data. This can show how opportunity quality interacts with individual performance.</p>
+<p>For a clearer a picture of the top and bottom players when it comes to CPOE we sorted the top and bottom performers into a graph.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Project1imagecombinebargraph.png" class="img-fluid figure-img"></p>
+<figcaption>Top Performers</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="project1graphcombinebadplayers.png" class="img-fluid figure-img"></p>
+<figcaption>Bottom Performers</figcaption>
+</figure>
+</div>
+<p>Another question is how pass catcher volume has an effect on efficiency? We determined that volume has little to no correlation with efficiency as seen below.</p>
+<p><img src="project1volumegraph.png" class="img-fluid"></p>
+<p>An important note for all of our results is that due to the lack of tracking data, our model doesn’t do a great job of knowing good throws from bad ones and similarly good routes from bad ones. Since we only have play-by-play data our model is good at predicting the likelihood of a catch based on situations rather then separation or accuracy. This results in the majority of our predictions being based off the types of opportunities each player gets rather then skill. Take for example De’von Achane who is schemed up at a lot of check down routes and screen passes, these passes are inherently easier to catch and are not due to Achane or his QB doing anything particularly impressive.</p>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<p>As a compliment to our predictive model, we chose a few players to show the predictions in real time throughout the seasons we chose. We chose the following players: Cole Kmet, De’Von Achane, DeAndre Hopkins, and Kenny Golladay. We searched for specific games and plays that highlight great catches and bad catches. We then calculated there probability of that play happening compared with our model. Finally we provided a video for each player to show the plays in action.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pbp <span class="ot">=</span> <span class="fu">rbind</span>(pbp_train, pbp_2024)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>pbp<span class="sc">$</span>predicted <span class="ot">=</span> <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> pbp)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>pbp_lookup <span class="ot">=</span> pbp <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(play_id, id, game_id, receiver_player_name, air_yards, down, half_seconds_remaining, predicted) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(receiver_player_name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>lookup <span class="ot">=</span> <span class="cf">function</span>(gid, pid) {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  value <span class="ot">=</span> pbp_lookup <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      game_id <span class="sc">==</span> gid,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      play_id <span class="sc">==</span> pid</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(value<span class="sc">$</span>predicted)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="cole-kmet" class="level4">
+<h4 class="anchored" data-anchor-id="cole-kmet">Cole Kmet</h4>
+<p>Our baseline completion model expects Tight Ends like Cole Kmet to have moderate to average catch probabilities on any given throw. This highlights the general use of a TE in the sense that we normally see them in the middle of the field getting catches in low to medium heavy traffic. Looking at ‘NFL Receiving Success: Predicted vs.&nbsp;Actual Performance (2021-2024)’ we see that he exceeds the mean of the Average Predicted Success. His expected catch probability is higher than normal which means he is getting either more opportunities, easier catches to complete, or both. What makes Kmet special in this data set is the Average Actual Success, he achieves above an 0.85 Average Actual Success rating which puts him over a 0.1 on our ‘Avg. CPOE by Season: Tracking Catch Performance (2021-2024)’ figure. This is significant because it showcases Kmet’s reliability in the offense and sets him apart from other pass catchers.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/KvfqOeWtNyM" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>Looking through his 2024 highlights, catches like (0:47) and (0:58) show the baseline of what tight ends do in the NFL. They are expected to make solid and strong catches in the middle of the field. What really justifies his 2024 season’s placement in our data are catches like (1:03) that put his actual success above his expected success with unlikely receptions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>table <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">timestamp =</span> <span class="fu">c</span>(<span class="st">":47"</span>, <span class="st">":58"</span>, <span class="st">"1:03"</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gid =</span> <span class="fu">c</span>(<span class="st">"2024_03_CHI_IND"</span>, <span class="st">"2024_03_CHI_IND"</span>, <span class="st">"2024_03_CHI_IND"</span>),</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="fu">c</span>(<span class="dv">3475</span>, <span class="dv">3694</span>, <span class="dv">4168</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>table<span class="sc">$</span>catch_probability <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">mapply</span>(lookup, table<span class="sc">$</span>gid, table<span class="sc">$</span>pid, <span class="at">SIMPLIFY =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  timestamp             gid  pid catch_probability
+1       :47 2024_03_CHI_IND 3475         0.7962252
+2       :58 2024_03_CHI_IND 3694         0.7718014
+3      1:03 2024_03_CHI_IND 4168         0.6070081</code></pre>
+</div>
+</div>
+</section>
+<section id="devon-achane" class="level4">
+<h4 class="anchored" data-anchor-id="devon-achane">De’von Achane</h4>
+<p>One of the highest predicted successes is De’von Achane (2024) and it is accompanied by an even higher Actual Success rating. The top right quadrant of the graph in ‘NFL Receiving Success: Predicted vs.&nbsp;Actual Performance (2021-2024)’ is primarily running backs because of check down passes. Respectively, the starting predicted success will be much higher to begin with and the players that are highest up on the Actual Success will be the most reliable when it comes to catching those dump-off passes.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/YaBOqrWhZfM" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>We see at time marks: (0:44), (1:14), and (6:05) that these check downs are frequent and easy, supporting the claim that Achane is a very reliable dump-off target and gets to the open spots on the field to help out his QB.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>table <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">timestamp =</span> <span class="fu">c</span>(<span class="st">":44"</span>, <span class="st">"1:14"</span>, <span class="st">"6:05"</span>),</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gid =</span> <span class="fu">c</span>(<span class="st">"2024_02_BUF_MIA"</span>,<span class="st">"2024_02_BUF_MIA"</span>, <span class="st">"2024_13_MIA_GB"</span>),</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="fu">c</span>(<span class="dv">669</span>, <span class="dv">2396</span>, <span class="dv">2905</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>table<span class="sc">$</span>catch_probability <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">mapply</span>(lookup, table<span class="sc">$</span>gid, table<span class="sc">$</span>pid, <span class="at">SIMPLIFY =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  timestamp             gid  pid catch_probability
+1       :44 2024_02_BUF_MIA  669         0.7765499
+2      1:14 2024_02_BUF_MIA 2396         0.8302349
+3      6:05  2024_13_MIA_GB 2905         0.8163801</code></pre>
+</div>
+</div>
+</section>
+<section id="deandre-hopkins" class="level4">
+<h4 class="anchored" data-anchor-id="deandre-hopkins">DeAndre Hopkins</h4>
+<p>A 2023 outlier that should be noticed is Deandre Hopkins. He is often thought of as one of the best receivers in the league and when you think of big name wide receivers it shows with a positive CPOE, meaning that they are over-performing.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/bRhdN3z2OUI" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>Catches like (0:04), (0:32), (6:01), and (8:38) are not expected to be made by any given receiver but Hopkins time and again comes down with it regardless of the odds. His positive CPOE also tells us that normal open field catches such as (2:21) and (4:32) are a given.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>table <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">timestamp =</span> <span class="fu">c</span>(<span class="st">":04"</span>, <span class="st">":32"</span>, <span class="st">"2:21"</span>, <span class="st">"4:32"</span>, <span class="st">"6:01"</span>, <span class="st">"8:38"</span>),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gid =</span> <span class="fu">c</span>(<span class="st">"2023_03_TEN_CLE"</span>,<span class="st">"2023_04_CIN_TEN"</span>, <span class="st">"2023_08_ATL_TEN"</span>, <span class="st">"2023_13_IND_TEN"</span>, <span class="st">"2023_14_TEN_MIA"</span>, <span class="st">"2023_18_JAX_TEN"</span>),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="fu">c</span>(<span class="dv">2005</span>, <span class="dv">1504</span>, <span class="dv">1583</span>, <span class="dv">1445</span>, <span class="dv">2045</span>, <span class="dv">1679</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>table<span class="sc">$</span>catch_probability <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">mapply</span>(lookup, table<span class="sc">$</span>gid, table<span class="sc">$</span>pid, <span class="at">SIMPLIFY =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  timestamp             gid  pid catch_probability
+1       :04 2023_03_TEN_CLE 2005         0.4280807
+2       :32 2023_04_CIN_TEN 1504         0.4011822
+3      2:21 2023_08_ATL_TEN 1583         0.7151600
+4      4:32 2023_13_IND_TEN 1445         0.5699244
+5      6:01 2023_14_TEN_MIA 2045         0.4115675
+6      8:38 2023_18_JAX_TEN 1679         0.6100048</code></pre>
+</div>
+</div>
+</section>
+<section id="kenny-golladay" class="level4">
+<h4 class="anchored" data-anchor-id="kenny-golladay">Kenny Golladay</h4>
+<p>On the lower end of our ’NFL Receiving Success: Predicted vs.&nbsp;Actual Performance (2021-2024) graph we have Kenny Golladay’s 2021 season with lower Actual Success than Predicted. This can be explained as simply not catching the ball when you are in an easy situation to do so.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/Qs4IBYUAoiY" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>Here we see at the time marker (0:02) the ball goes directly through his hands without much coverage at the point of reception.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>table <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">timestamp =</span> <span class="fu">c</span>(<span class="st">":02"</span>),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gid =</span> <span class="fu">c</span>(<span class="st">"2021_02_NYG_WAS"</span>),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="fu">c</span>(<span class="dv">2730</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>table<span class="sc">$</span>catch_probability <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">mapply</span>(lookup, table<span class="sc">$</span>gid, table<span class="sc">$</span>pid, <span class="at">SIMPLIFY =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  timestamp             gid  pid catch_probability
+1       :02 2021_02_NYG_WAS 2730         0.6793609</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Barfield, Graham. “Fantasy Points Data: Most Important WR STATS.” Fantasy Points, July 29, 2023. <a href="https://www.fantasypoints.com/nfl/articles/2023/fantasy-points-data-most-important-wr-stats#/." class="uri">https://www.fantasypoints.com/nfl/articles/2023/fantasy-points-data-most-important-wr-stats#/.</a></p>
+<p>Deshpande, Sameer. “Lecture 2: Expected Goals.” Lecture 2: Expected Goals – STAT479, September 2025. <a href="https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture02.html." class="uri">https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture02.html.</a></p>
+<p>Deshpande, Sameer. “Lecture 3: Estimating XG.” Lecture 3: Estimating XG – STAT479, September 2025. <a href="https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture03.html." class="uri">https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture03.html.</a></p>
+<p>Hernandez, TJ. “The Most Predictable Wide Receiver Stats.” SI, July 31, 2018. <a href="https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats." class="uri">https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats.</a></p>
+<p>Hoopes, Stephen. “The Most Predictable Wide Receiver Stats.” 4for4 Fantasy Football, July 8, 2024. <a href="https://www.4for4.com/2024/preseason/most-predictable-wide-receiver-stats." class="uri">https://www.4for4.com/2024/preseason/most-predictable-wide-receiver-stats.</a></p>
+<p>“Ngs: NFL next Gen Stats.” Next Gen Stats. Accessed October 7, 2025. <a href="https://nextgenstats.nfl.com/stats/receiving#yards." class="uri">https://nextgenstats.nfl.com/stats/receiving#yards.</a></p>
+<p>“An R Package to Quickly Obtain Clean and Tidy NFL Play by Play Data.” Dev status. Accessed October 6, 2025. <a href="https://www.nflfastr.com/index.html." class="uri">https://www.nflfastr.com/index.html.</a></p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
