@@ -1,0 +1,399 @@
+---
+title: "Project_One_Report"
+format: html
+editor: visual
+---
+
+```{r, include=FALSE}
+library(dplyr)
+```
+
+## Executive Summary
+
+Measuring receiver success in football is a nuanced challenge, especially in today’s game, where wide receivers, tight ends, and running backs all play key roles in the passing game. Completion percentage over expected is typically used to evaluate quarterback performance, but we applied this concept to pass catchers. To evaluate pass catcher value, we focused on how often a pass is completed when a player is targeted, compared to how likely that pass was to be completed. 
+
+Our model was inspired by estimating expected goals for soccer, which uses shot data to calculate expected goals and, further, goals above expected. Using play-by-play data from the NFLfastR data set, we estimated the probability of a pass being caught based on factors like down, distance, and air yards. We used data from the 2021-2023 seasons to predict receiving outcomes for the 2024 season. Plays missing key variables were excluded, as we couldn't reliably fill in the gaps. We also limited our analysis to pass catchers with at least 50 targets per season to avoid skewed results. This benchmark was determined by our sources we found from [Sports Illustrated](https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats) and [Next Generation Stats](https://nextgenstats.nfl.com/stats/receiving#yards), which suggest 65 and 42 as target benchmarks. 
+
+Overall, our model had somewhat strong predictive power, explaining 60% of the variance in the data during the 2024 season. We also found several interesting insights. Cooper Kupp’s season was backed by high completion rate evidence; he consistently caught more passes than expected. Running backs have also become highly effective targets. For example, Devon Achane's 2024 season was impressive, ranking among league leaders for reception percentage over expected. These results make sense because Achane is often targeted close to the line of scrimmage or even behind it, so his quarterback does not have to make significantly difficult throws, and Achane does have to catch the ball at full speed while closely guarded by defenders. One of the most interesting insights was identifying reliable yet low recognition targets. A player like Cole Kmet in 2024 had a strong catch rate above expected despite limited volume, suggesting that teams might uncover hidden value by analyzing receiver efficiency. 
+
+While our model offers meaningful insights, it has limitations. More advanced tracking data, such as receiver separation or proximity to the sideline, could improve our predictions and better capture pass catcher performance. These insights suggest that with smarter data and more intense models, teams can uncover more overlooked talent and rethink efficiency.
+
+## Technical Report
+
+### Overview
+
+This project introduces a Completion Percentage Over Expected (CPOE) model tailored for pass catchers. Using the play-by-play data made available through the nflfastR package, we created a model that predicts at what rate a receiver catches a target over what is expected. While CPOE traditionally measures Completion Percentage Over Expected of a quarterback, we wanted to determine how this could be applied to pass catchers. This model was influenced by Lectures 2 and 3 in our sports analytics class tought by professor Sameer Deshpande, dealing with expected goals in soccer. This report will break down how we constructed our model and show application of the model regarding the 2021-2024 NFL seasons.
+
+### Data Gathering
+
+Before beginning model training, we first ensured that our data set was usable and relevant. The first step was to narrow down the range of data. We selected the 2021 through 2024 NFL seasons for training and testing purposes (we will explain this in detail later). This time frame was chosen because it reflects the relatively modern game play trends, increasing the likelihood that our model will generalize well to future seasons. We excluded the 2020 season, which was an outlier due to COVID. To source our data, we used the nflfastR package, which provides a wide range of play-by-play variables that are suitable for modeling and this data is supported with great documentation and resources.
+
+```{r, warning=FALSE, error=FALSE}
+library(nflfastR)
+set.seed(2024)
+pbp_train = load_pbp(2021:2023)
+pbp_2024 = load_pbp(2024)
+```
+
+### Data Preparation
+
+To begin we filtered out all plays that were not passing plays during the regular season. We chose to focus exclusively on regular season data to avoid introducing variability from preseason or postseason contexts, which could act as a confounding predictor. Next, we removed plays that resulted in a sack, spike, kneel, throwaway, or aborted pass, these events prevent a pass catcher from having a legitimate opportunity to complete the target and would distort the model. We also excluded two-point conversion attempts to maintain consistency with standard offensive phases and avoid skewing the model with rare and atypical plays. After isolating the valid passing plays, we selected a subset of variables relevant to our modeling goals (discussed in the next section) and cleaned the data set accordingly. Specifically we dropped any rows with missing values in the following fields: completed_pass, air_yards, pass_location, down, ydstogo, yardline_100, and reciever_player_id. This ensured that each target in our data set had complete information for all predictors required to estimate completion probability.
+
+```{r, error=FALSE, warning=FALSE}
+
+train_pass <-
+  pbp_train %>%
+  dplyr::filter(play_type=="pass", season_type=="REG") %>%
+  dplyr::filter(
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc),  
+    !grepl("sack", desc, ignore.case = TRUE),
+    !grepl("spike", desc, ignore.case = TRUE),
+    !grepl("kneel", desc, ignore.case = TRUE),
+    !grepl("throwaway", desc, ignore.case = TRUE),
+    !grepl("aborted", desc, ignore.case = TRUE)
+  ) %>%
+  dplyr::select(
+    game_id, play_id, complete_pass, air_yards, shotgun, no_huddle, qb_hit, posteam_type, pass_location, 
+    yardline_100, down, ydstogo, posteam, defteam, passer_player_id, desc, receiver_player_id, receiver_player_name, season
+  ) %>%
+  dplyr::filter(
+    !is.na(complete_pass),
+    !is.na(air_yards),
+    !is.na(pass_location),
+    !is.na(down),
+    !is.na(ydstogo),
+    !is.na(yardline_100),
+    !is.na(receiver_player_id)
+  ) %>%
+  dplyr::mutate(
+    shotgun = ifelse(is.na(shotgun), 0L, shotgun),
+    no_huddle = ifelse(is.na(no_huddle), 0L, no_huddle),
+    qb_hit = ifelse(is.na(qb_hit), 0L, qb_hit),
+    posteam_type = factor(posteam_type),
+    pass_location = factor(pass_location),
+    down = factor(down),
+  ) 
+```
+
+```{r}
+test_pass <-
+  pbp_2024 %>%
+  dplyr::filter(play_type == "pass", season_type== "REG") %>%
+  dplyr::filter(
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc),  
+    !grepl("sack", desc, ignore.case = TRUE),
+    !grepl("spike", desc, ignore.case = TRUE),
+    !grepl("kneel", desc, ignore.case = TRUE),
+    !grepl("throwaway", desc, ignore.case = TRUE),
+    !grepl("aborted", desc, ignore.case = TRUE)
+  ) %>%
+  dplyr::select(
+    game_id, play_id ,complete_pass, air_yards, shotgun, no_huddle, qb_hit, posteam_type, pass_location, 
+    yardline_100, down, ydstogo, posteam, defteam, passer_player_id, desc, receiver_player_id, receiver_player_name, season
+  ) %>%
+  dplyr::filter(
+    !is.na(complete_pass),
+    !is.na(air_yards),
+    !is.na(pass_location),
+    !is.na(down),
+    !is.na(ydstogo),
+    !is.na(yardline_100),
+    !is.na(receiver_player_id)
+  ) %>%
+  dplyr::mutate(
+    shotgun = ifelse(is.na(shotgun), 0L, shotgun),
+    no_huddle = ifelse(is.na(no_huddle), 0L, no_huddle),
+    qb_hit = ifelse(is.na(qb_hit), 0L, qb_hit),
+    posteam_type = factor(posteam_type, levels = levels(train_pass$posteam_type)),
+    pass_location = factor(pass_location, levels = levels(train_pass$pass_location)),
+    down = factor(down, levels = levels(train_pass$down)),
+  ) 
+```
+
+### Feature Selection
+
+Most modern CPOE models rely on a combination of play-by-play data and advanced player tracking data. For this project, we chose to work exclusively with play-by-play data due to the difficulty of acquiring and processing tracking data. While this choice limits the amount of variables that we can work with, we selected variables as best as we could to capture situation context.
+
+The variables used in our model include:
+
+-   Air yards: Measures the depth of the throw, a key indicator for difficulty.
+
+-   Formation: Whether the play began in shotgun or under-center.
+
+-   No-huddle: Indicates the tempo and urgency of the play.
+
+-   QB hits: Explains pressure or interference.
+
+-   Pass location: Left, right, or center.
+
+-   Yardline: The starting field position, which influences play calling.
+
+-   Down and Distance: Captures game situation and urgency.
+
+These variables describe the context, action, and condition of the play. To validate our feature choices we ran a logistical regression model. This assesses the statistical significance of the variables. All selected variables show meaningful contribution to predicting the completion probability.
+
+```{r}
+comp_glm <- glm(
+  complete_pass ~ air_yards + shotgun + no_huddle + qb_hit + pass_location+ yardline_100 + down + ydstogo,
+  data= train_pass,
+  family=binomial()
+)
+```
+
+```{r, echo=FALSE}
+coef_table <- summary(comp_glm)$coefficients
+
+# Create a data frame with significance stars
+neat_table <- data.frame(
+  Variable = rownames(coef_table),
+  Estimate = round(coef_table[, "Estimate"], 3),
+  Std_Error = round(coef_table[, "Std. Error"], 3),
+  z_value = round(coef_table[, "z value"], 2),
+  Significant = ifelse(coef_table[, "Pr(>|z|)"] < 0.05, "Yes", "No")
+)
+
+neat_table
+```
+
+After determining our variables were significant we're ready to train our model.
+
+### Model Training
+
+We used the [ranger](https://imbs-hl.github.io/ranger/index.html) package to implement a random forest classifier for predicting completion probability. While we do not detail every modeling parameter in this report, our choices were guided by two considerations.
+
+1\) Function Approximation: Random forests are considered universal approximaters, meaning they can model highly nonlinear relationships. This means that for every function that exists there is a regression tree that can approximate it. This is essential for capturing complex football plays.
+
+2\) Interaction Modeling: Football is very interactive. For example, a 10- yard pass to the left side of the field differs dramatically from a 50-yard pass to the same area. Random forests can capture this complex interaction data and Interactions are also important for modeling CPOE.
+
+To avoid sampling bias, we split the data by season: training on 2021-2023 and testing on 2024. This ensures that our model is evaluated on unseen data and simulates real-world conditions. This was also important to ensure no in-sampling testing occurred.
+
+```{r}
+y_train = train_pass$complete_pass
+y_test = test_pass$complete_pass
+
+train_data = train_pass %>%
+select(complete_pass, air_yards, shotgun, no_huddle, qb_hit, pass_location, yardline_100, down, ydstogo)
+
+test_data = test_pass %>%
+select(complete_pass, air_yards, shotgun, no_huddle, qb_hit, pass_location, yardline_100, down, ydstogo)
+
+train_data <- train_data %>%
+mutate(complete_pass = factor(complete_pass, levels = c(0,1)))
+
+test_data <- test_data %>%
+mutate(complete_pass = factor(complete_pass, levels = c(0,1)))
+
+```
+
+```{r}
+library(ranger)
+fit = ranger(
+    formula = complete_pass~ .,
+    data = train_data, 
+    probability = TRUE)
+  
+#Predict on our training and test data
+train_pass$train_preds = 
+  predict(object = fit, data = train_pass)$predictions[,2]
+
+test_pass$test_preds =
+  predict(object = fit, data = test_pass)$predictions[,2]
+
+train_data$train_preds = predict(fit, data = train_data)$predictions[,2]
+test_data$test_preds  = predict(fit, data = test_data)$predictions[,2]
+
+
+```
+
+In order to evaluate our model we'll use log-loss.
+
+```{r}
+logloss = function(y, phat){ 
+  phat = pmin(pmax(phat, 1e-12), 1 - 1e-12) 
+  return(-mean(y * log(phat) + (1-y) * log(1 - phat)))}
+
+train_logloss = logloss(y_train, train_pass$train_preds)
+test_logloss  = logloss(y_test,  test_pass$test_preds)
+```
+
+```{r, echo=FALSE}
+table = data.frame(
+  Model = c("Train", "Test"),
+  LogLoss = round(c(train_logloss, test_logloss), 5)
+)
+
+table
+```
+
+### Results
+
+With the model trained and validated, we applied it to all targets from 2021-2024 regular season data. For each target, the model outputs a predicted probability of completion. We then aggregated these predictions by pass catcher to compare expected completion rates against actual performance.
+
+To ensure reliability of our estimates, we limited our analysis to pass catchers with at least 50 targets. This threshold was chosen by looking at industry sources including [fantasypoints.com](https://www.fantasypoints.com/nfl/articles/2023/fantasy-points-data-most-important-wr-stats#/), [4for4.com](https://www.4for4.com/2024/preseason/most-predictable-wide-receiver-stats), [Sports Illustrated](https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats), and [Next Gen Stats](https://nextgenstats.nfl.com/stats/receiving#yards) to determine a range of targets that would be acceptable.
+
+The relationship between predicted and actual success rates was moderately strong, with an r\^2 value of .60 in the 2024 season. This suggests that our model captures a good proportion of the variance in catch passer performance.
+
+```{r, warning=FALSE, error=FALSE}
+summary_24 = test_pass %>% 
+  group_by(receiver_player_name, season) %>% 
+  summarise(
+    avg_predicted_suc = mean(test_preds),
+    actual_success = mean(as.numeric(as.character(complete_pass))),
+    n_targets = n()) %>%
+  arrange(desc(actual_success)) %>%
+  filter(n_targets > 50) %>% 
+  mutate(wrcpoe = actual_success - avg_predicted_suc) %>%
+  rename(Name = receiver_player_name)
+
+summary21_23 = train_pass %>%
+  group_by(receiver_player_name, season) %>% 
+  summarise(
+    avg_predicted_suc = mean(train_preds),
+    actual_success = mean(as.numeric(as.character(complete_pass))),
+    n_targets = n()) %>%
+  arrange(desc(actual_success)) %>%
+  filter(n_targets > 50) %>% 
+  mutate(wrcpoe = actual_success - avg_predicted_suc) %>%
+  rename(Name = receiver_player_name)
+
+summary = rbind(summary21_23, summary_24)
+```
+
+![2021 r\^2 = 0.612367, 2022 r\^2 = 0.684678, 2023 r\^2 = 0.666335, 2024 r\^2 = 0.600968](Finalgraphactual_vs_predicted.png)
+
+We also chose to divide the relationship between predicted and actual success into four quadrants to better interpret receiver performance. The upper right quadrant represents players who receive relatively easy opportunities and consistently convert them. These are often running backs or short-yardage specialist players, for example De'von Achane, Bucky Irving, and Rachaad White. In contrast, the bottom left quadrant includes players who are targeted in difficult situations and fail to convert them. This group consists of deep-threat receivers like Adonai Mitchell, who face low probability throws resulting in lower completion rates. The bottom right quadrant captures players who receive easier opportunities but fail to convert the. This suggests inefficiency in performance, execution, timing, and other factors. Finally, the top left quadrant is unique, it highlights players who are supposed to make difficult catches and still succeed. This includes Tight ends like Cole Kmet, Mark Andrews, and George Kittle. They consistently outperform expectations. This quadrant framework lets us contextualize receiver efficiency beyond the raw data. This can show how opportunity quality interacts with individual performance.
+
+For a clearer a picture of the top and bottom players when it comes to CPOE we sorted the top and bottom performers into a graph.
+
+![Top Performers](Project1imagecombinebargraph.png)
+
+![Bottom Performers](project1graphcombinebadplayers.png)
+
+Another question is how pass catcher volume has an effect on efficiency? We determined that volume has little to no correlation with efficiency as seen below.
+
+![](project1volumegraph.png)
+
+An important note for all of our results is that due to the lack of tracking data, our model doesn't do a great job of knowing good throws from bad ones and similarly good routes from bad ones. Since we only have play-by-play data our model is good at predicting the likelihood of a catch based on situations rather then separation or accuracy. This results in the majority of our predictions being based off the types of opportunities each player gets rather then skill. Take for example De'von Achane who is schemed up at a lot of check down routes and screen passes, these passes are inherently easier to catch and are not due to Achane or his QB doing anything particularly impressive.
+
+### Examples
+
+As a compliment to our predictive model, we chose a few players to show the predictions in real time throughout the seasons we chose. We chose the following players: Cole Kmet, De'Von Achane, DeAndre Hopkins, and Kenny Golladay. We searched for specific games and plays that highlight great catches and bad catches. We then calculated there probability of that play happening compared with our model. Finally we provided a video for each player to show the plays in action.
+
+```{r}
+pbp = rbind(pbp_train, pbp_2024)
+
+pbp$predicted = predict(object = fit, data = pbp)$predictions[,2]
+```
+
+```{r}
+pbp_lookup = pbp %>%
+  select(play_id, id, game_id, receiver_player_name, air_yards, down, half_seconds_remaining, predicted) %>%
+  filter(!is.na(receiver_player_name))
+```
+
+```{r}
+lookup = function(gid, pid) {
+  value = pbp_lookup %>%
+    filter(
+      game_id == gid,
+      play_id == pid
+    )
+  return(value$predicted)
+}
+```
+
+#### Cole Kmet
+
+Our baseline completion model expects Tight Ends like Cole Kmet to have moderate to average catch probabilities on any given throw. This highlights the general use of a TE in the sense that we normally see them in the middle of the field getting catches in low to medium heavy traffic. Looking at 'NFL Receiving Success: Predicted vs. Actual Performance (2021-2024)' we see that he exceeds the mean of the Average Predicted Success. His expected catch probability is higher than normal which means he is getting either more opportunities, easier catches to complete, or both. What makes Kmet special in this data set is the Average Actual Success, he achieves above an 0.85 Average Actual Success rating which puts him over a 0.1 on our 'Avg. CPOE by Season: Tracking Catch Performance (2021-2024)' figure. This is significant because it showcases Kmet's reliability in the offense and sets him apart from other pass catchers.
+
+{{< video https://www.youtube.com/watch?v=KvfqOeWtNyM >}}
+
+Looking through his 2024 highlights, catches like (0:47) and (0:58) show the baseline of what tight ends do in the NFL. They are expected to make solid and strong catches in the middle of the field. What really justifies his 2024 season's placement in our data are catches like (1:03) that put his actual success above his expected success with unlikely receptions.
+
+```{r}
+table = data.frame(
+  timestamp = c(":47", ":58", "1:03"),
+  gid = c("2024_03_CHI_IND", "2024_03_CHI_IND", "2024_03_CHI_IND"),
+  pid = c(3475, 3694, 4168)
+)
+
+table$catch_probability <- as.numeric(mapply(lookup, table$gid, table$pid, SIMPLIFY = TRUE))
+
+table
+```
+
+#### De'von Achane
+
+One of the highest predicted successes is De’von Achane (2024) and it is accompanied by an even higher Actual Success rating. The top right quadrant of the graph in 'NFL Receiving Success: Predicted vs. Actual Performance (2021-2024)' is primarily running backs because of check down passes. Respectively, the starting predicted success will be much higher to begin with and the players that are highest up on the Actual Success will be the most reliable when it comes to catching those dump-off passes.
+
+{{< video https://www.youtube.com/watch?v=YaBOqrWhZfM >}}
+
+We see at time marks: (0:44), (1:14), and (6:05) that these check downs are frequent and easy, supporting the claim that Achane is a very reliable dump-off target and gets to the open spots on the field to help out his QB.
+
+```{r}
+table = data.frame(
+  timestamp = c(":44", "1:14", "6:05"),
+  gid = c("2024_02_BUF_MIA","2024_02_BUF_MIA", "2024_13_MIA_GB"),
+  pid = c(669, 2396, 2905)
+)
+
+table$catch_probability <- as.numeric(mapply(lookup, table$gid, table$pid, SIMPLIFY = TRUE))
+
+table
+```
+
+#### DeAndre Hopkins
+
+A 2023 outlier that should be noticed is Deandre Hopkins. He is often thought of as one of the best receivers in the league and when you think of big name wide receivers it shows with a positive CPOE, meaning that they are over-performing.
+
+{{< video https://www.youtube.com/watch?v=bRhdN3z2OUI >}}
+
+Catches like (0:04), (0:32), (6:01), and (8:38) are not expected to be made by any given receiver but Hopkins time and again comes down with it regardless of the odds. His positive CPOE also tells us that normal open field catches such as (2:21) and (4:32) are a given.
+
+```{r}
+table = data.frame(
+  timestamp = c(":04", ":32", "2:21", "4:32", "6:01", "8:38"),
+  gid = c("2023_03_TEN_CLE","2023_04_CIN_TEN", "2023_08_ATL_TEN", "2023_13_IND_TEN", "2023_14_TEN_MIA", "2023_18_JAX_TEN"),
+  pid = c(2005, 1504, 1583, 1445, 2045, 1679)
+)
+
+table$catch_probability <- as.numeric(mapply(lookup, table$gid, table$pid, SIMPLIFY = TRUE))
+
+table
+```
+
+#### Kenny Golladay
+
+On the lower end of our ‘NFL Receiving Success: Predicted vs. Actual Performance (2021-2024) graph we have Kenny Golladay’s 2021 season with lower Actual Success than Predicted. This can be explained as simply not catching the ball when you are in an easy situation to do so.
+
+{{< video https://www.youtube.com/watch?v=Qs4IBYUAoiY >}}
+
+Here we see at the time marker (0:02) the ball goes directly through his hands without much coverage at the point of reception.
+
+```{r}
+table = data.frame(
+  timestamp = c(":02"),
+  gid = c("2021_02_NYG_WAS"),
+  pid = c(2730)
+)
+
+table$catch_probability <- as.numeric(mapply(lookup, table$gid, table$pid, SIMPLIFY = TRUE))
+
+table
+```
+
+## References
+
+Barfield, Graham. “Fantasy Points Data: Most Important WR STATS.” Fantasy Points, July 29, 2023. <https://www.fantasypoints.com/nfl/articles/2023/fantasy-points-data-most-important-wr-stats#/.>
+
+Deshpande, Sameer. “Lecture 2: Expected Goals.” Lecture 2: Expected Goals – STAT479, September 2025. <https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture02.html.>
+
+Deshpande, Sameer. “Lecture 3: Estimating XG.” Lecture 3: Estimating XG – STAT479, September 2025. <https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture03.html.>
+
+Hernandez, TJ. “The Most Predictable Wide Receiver Stats.” SI, July 31, 2018. <https://www.si.com/nfl/2018/07/31/fantasy-football-2018-most-predictable-wide-receiver-stats.>
+
+Hoopes, Stephen. “The Most Predictable Wide Receiver Stats.” 4for4 Fantasy Football, July 8, 2024. <https://www.4for4.com/2024/preseason/most-predictable-wide-receiver-stats.>
+
+“Ngs: NFL next Gen Stats.” Next Gen Stats. Accessed October 7, 2025. <https://nextgenstats.nfl.com/stats/receiving#yards.>
+
+“An R Package to Quickly Obtain Clean and Tidy NFL Play by Play Data.” Dev status. Accessed October 6, 2025. <https://www.nflfastr.com/index.html.>
